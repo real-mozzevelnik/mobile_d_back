@@ -254,6 +254,29 @@ app.post('/data/create_transaction', async (req, res) => {
   }
 });
 
+// Update transaction
+app.post('/data/update_transaction', async (req, res) => {
+  try {
+    const { id, userId, title, amount, type, categoryId, categoryName, date, description } = req.body;
+
+    if (!userId || !title || amount === undefined || type === undefined || !categoryId || !date) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const newTransaction = await pool.query(
+      `UPDATE transactions SET
+        user_id = $1, title = $2, amount = $3, type = $4, category_id = $5, category_name = $6, date = $7, description = $8
+      where id = $9`,
+      [userId, title, amount, type, categoryId, categoryName || null, date, description || null, id]
+    );
+
+    res.json({});
+  } catch (error) {
+    console.error('Update transaction error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Delete transaction
 app.post('/data/delete_transaction', async (req, res) => {
   try {
